@@ -117,3 +117,6 @@ const Rooms = () => {
 };
 
 export default Rooms;
+
+
+//room page
