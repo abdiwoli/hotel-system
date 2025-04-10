@@ -3,7 +3,7 @@ import Stripe from 'stripe';
 import { AuthOptions as authOptions } from '@/libs/auth';
 import { getServerSession } from 'next-auth';
 import { NextResponse } from 'next/server';
-import { getRoom, getRoomByQuery, getRoomBySlug } from '@/libs/apis';
+import { getRoomByQuery } from '@/libs/apis';
 import { Room } from '@/app/models/room';
 
 const stripe = new Stripe(`${process.env.STRIPE_SECRET}`, {

@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import LoadingSpinner from "./loading";
 import { searchRoomsByName } from "./searchRoomsByName";
-import { set } from "date-fns";
 import RoomDetails from "@/components/Room/RoomDetails";
 import PageSearch from "@/components/PageSearch/PageSearch";
 

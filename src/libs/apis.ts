@@ -1,18 +1,7 @@
 import axios from "axios";
 import { Booking, CreateBookingDto, Room } from '@/app/models/room';
-import { getBookingsQuery, getFeaturedRoomQuery, getRoomQuery, getRoomTypesQuery } from './SanityQuery';
+import { getBookingsQuery, getRoomQuery, getRoomTypesQuery } from './SanityQuery';
 import sanityClient from './sanity';
-
-export const getStaticProps = async () => {
-    const featuredRooms: Room[] = await sanityClient.fetch(getFeaturedRoomQuery);
-
-    // Pick the first room (or random, latest, etc.)
-    return {
-        rooms: featuredRooms,
-    }
-
-};
-
 
 
 export const getRoomByQuery = async (name: string, roomType: string, slug: string) => {
@@ -22,12 +11,6 @@ export const getRoomByQuery = async (name: string, roomType: string, slug: strin
     return rooms;
 }
 
-export const getRoomBySlug = async (slug: string) => {
-    const params = { slug };
-    const room: Room[] = await sanityClient.fetch(getRoomQuery, params);
-    if (room && room.length > 0) return room[0];
-    return null
-}
 
 export const getBookingByRoomId = async (roomId: string) => {
     console.log('fetching booking')
