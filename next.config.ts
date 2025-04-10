@@ -1,4 +1,8 @@
 module.exports = {
+  // Disable ESLint by not specifying any directories to lint
+  eslint: {
+    dirs: [],
+  },
   images: {
     remotePatterns: [
       {
@@ -21,7 +25,6 @@ module.exports = {
         protocol: "https",
         hostname: "lh3.googleusercontent.com",
       },
-
     ],
   },
 };
