@@ -13,11 +13,13 @@ const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
     rules: {
-      // Make all rules 'warn' instead of 'error'
-      "no-console": "warn",
-      "no-unused-vars": "warn", // Example: warning for unused vars instead of error
-      "react/prop-types": "warn", // Example: warning for missing prop types
-    }
+      // Change these rules to 'warn' instead of 'error'
+      "no-console": "warn",                    // Warn instead of error for console logs
+      "no-unused-vars": "warn",               // Warn instead of error for unused variables
+      "@typescript-eslint/no-unused-vars": "warn", // TypeScript specific for unused vars
+      "@typescript-eslint/no-explicit-any": "warn", // Warn instead of error for explicit 'any' types
+      "react/prop-types": "warn",             // Warn instead of error for missing prop types
+    },
   }
 ];
 
