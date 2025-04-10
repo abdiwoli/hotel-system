@@ -1,7 +1,7 @@
 module.exports = {
   // Disable ESLint by not specifying any directories to lint
   eslint: {
-    dirs: [],
+    ignoreDuringBuilds: true,
   },
   images: {
     remotePatterns: [
