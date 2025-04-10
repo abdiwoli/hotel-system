@@ -1,6 +1,6 @@
 import axios from "axios";
 import { Booking, CreateBookingDto, Room } from '@/app/models/room';
-import { getAllRooms, getBookingsQuery, getFeaturedRoomQuery, getRoomBySlugQuery, getRoomQuery, getRoomTypesQuery, } from './SanityQuery';
+import { getBookingsQuery, getFeaturedRoomQuery, getRoomQuery, getRoomTypesQuery } from './SanityQuery';
 import sanityClient from './sanity';
 
 export const getStaticProps = async () => {
@@ -36,10 +36,10 @@ export const getBookingByRoomId = async (roomId: string) => {
     const bookings: Booking[] = await sanityClient.fetch(getBookingsQuery, params);
 
     if (bookings && bookings.length > 0) {
-        return bookings; // Return the bookings for the room
+        return bookings;
     }
     console.log("no booking found");
-    return []; // Return an empty array if no bookings are found
+    return [];
 };
 
 

@@ -1,5 +1,5 @@
 "use client";
-import { ChangeEvent, use, useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import { FC } from "react";
 import { useRouter } from "next/navigation";

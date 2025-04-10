@@ -1,5 +1,4 @@
-import { Room } from '@/app/models/room';
-import { createBooking, getRoomByQuery, updateHotelRoom } from '@/libs/apis';
+import { createBooking, updateHotelRoom } from '@/libs/apis';
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
