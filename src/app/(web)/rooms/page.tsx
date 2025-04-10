@@ -105,7 +105,7 @@ const Rooms = () => {
             ) : (
                 <>
                     {room ? (
-                        <RoomDetails room={room} onBook={handleBook} />
+                        <RoomDetails room={room} />
                     ) : (
                         <p className="text-center text-gray-500">No room selected.</p>
                     )}
