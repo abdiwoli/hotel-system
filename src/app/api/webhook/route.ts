@@ -1,7 +1,7 @@
 import Stripe from 'stripe';
 import { createBooking, updateHotelRoom } from '@/libs/apis';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+const stripe = new Stripe(process.env.STRIPE_SECRET!, {
     apiVersion: '2025-03-31.basil',
 });
 
