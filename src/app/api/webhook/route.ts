@@ -1,6 +1,13 @@
-import { createBooking, updateHotelRoom } from '@/libs/apis';
-import { NextResponse } from 'next/server';
+import { buffer } from 'micro';
+import type { NextApiRequest, NextApiResponse } from 'next';
 import Stripe from 'stripe';
+import { createBooking, updateHotelRoom } from '@/libs/apis';
+
+export const config = {
+    api: {
+        bodyParser: false,
+    },
+};
 
 const stripe = new Stripe(process.env.STRIPE_SECRET!, {
     apiVersion: '2025-03-31.basil',
@@ -8,25 +15,26 @@ const stripe = new Stripe(process.env.STRIPE_SECRET!, {
 
 const webhookSecret = process.env.WEBHOOK_SECRET_K!;
 
-export async function POST(req: Request) {
-    const rawBody = await req.text();
-    const signature = req.headers.get('stripe-signature');
-
-    if (!signature || !webhookSecret) {
-        return NextResponse.json({ error: 'Missing signature or webhook secret' }, { status: 400 });
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+    if (req.method !== 'POST') {
+        return res.status(405).end('Method Not Allowed');
     }
+
+    const buf = await buffer(req);
+    const signature = req.headers['stripe-signature'] as string;
 
     let event: Stripe.Event;
 
     try {
-        event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+        event = stripe.webhooks.constructEvent(buf.toString(), signature, webhookSecret);
     } catch (err: any) {
-        console.error('Webhook signature verification failed:', err.message);
-        return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
+        console.error('❌ Webhook Error:', err.message);
+        return res.status(400).json({ error: `Webhook Error: ${err.message}` });
     }
 
     if (event.type === 'checkout.session.completed') {
         const session = event.data.object as Stripe.Checkout.Session;
+
         const {
             hotelRoom,
             user,
@@ -37,49 +45,35 @@ export async function POST(req: Request) {
             numberOfDays,
             totalPrice,
             discount,
-        } = session.metadata!;
+        } = session.metadata ?? {};
 
-        // Log the metadata to inspect its contents
-        console.log('Session Metadata:', session.metadata);
+        console.log('✅ Metadata:', session.metadata);
 
-        if (hotelRoom) {
-            try {
-                console.log('✅ Checkout Session Completed:', session.id);
-                console.log(`📦 Booking confirmed for room ${hotelRoom} by user ${user}`);
+        if (!hotelRoom) {
+            return res.status(400).json({ error: 'Invalid hotel room slug' });
+        }
 
-                // ✅ Convert all required numbers from string
-                const bookingData = {
-                    adults: parseInt(adults),
-                    children: parseInt(children),
-                    checkIn: checkinDate,
-                    checkOut: checkoutDate,
-                    hotelroom: hotelRoom,
-                    numberOfDays: parseInt(numberOfDays),
-                    totalPrice: parseFloat(totalPrice),
-                    discount: parseFloat(discount),
-                    user,
-                };
+        const bookingData = {
+            adults: parseInt(adults),
+            children: parseInt(children),
+            checkIn: checkinDate,
+            checkOut: checkoutDate,
+            hotelroom: hotelRoom,
+            numberOfDays: parseInt(numberOfDays),
+            totalPrice: parseFloat(totalPrice),
+            discount: parseFloat(discount),
+            user,
+        };
 
-                console.log('Creating booking with data:', bookingData);
-
-                try {
-                    await createBooking(bookingData);
-                    await updateHotelRoom(hotelRoom);
-                    console.log('Booking successfully created');
-                } catch (err: any) {
-                    console.error('❌ Failed to create booking:', err.message);
-                    return NextResponse.json({ error: 'Booking failed', details: err.message }, { status: 500 });
-                }
-
-            } catch (err: any) {
-                console.error('Error fetching room:', err);
-                return NextResponse.json({ error: 'Room fetching failed', details: err.message }, { status: 500 });
-            }
-        } else {
-            console.log("Hotel room slug is invalid or empty");
-            return NextResponse.json({ error: 'Invalid hotel room slug' }, { status: 400 });
+        try {
+            await createBooking(bookingData);
+            await updateHotelRoom(hotelRoom);
+            console.log('✅ Booking saved');
+        } catch (err: any) {
+            console.error('❌ Booking failed:', err.message);
+            return res.status(500).json({ error: 'Booking failed', details: err.message });
         }
     }
 
-    return NextResponse.json({ received: true }, { status: 200 });
+    res.status(200).json({ received: true });
 }
