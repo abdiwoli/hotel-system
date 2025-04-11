@@ -29,12 +29,13 @@ const Auth = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const url = searchParams.get("url") || "";
+    const slug = searchParams.get("slug") || "";
+    const roomType = searchParams.get("roomType") || "";
 
     useEffect(() => {
         if (session) {
-            if (url) {
-                const fixedUrl = url.startsWith("/") ? url : `/${url}`;
-                router.push(fixedUrl);
+            if (url && url == "rooms") {
+                router.push(`/rooms?slug=${slug}&roomType=${roomType}`);
             } else {
                 router.push("/");
             }

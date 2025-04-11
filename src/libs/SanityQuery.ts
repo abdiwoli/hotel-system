@@ -11,6 +11,24 @@ export const getBookingsQuery = groq`
   }
 `;
 
+export const getBookingsQueryForUser = groq`
+  *[_type == "booking" && user._ref == $userId] {
+    _id,
+    checkIn,
+    checkOut,
+    adults,
+    children,
+    totalPrice,
+    hotelroom-> {
+      _id,
+      name,
+      slug,
+      roomType,
+    }
+  }
+`;
+
+
 
 
 // 1. Define reusable fields at the top

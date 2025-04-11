@@ -2,7 +2,7 @@
 
 import { Room } from "@/app/models/room";
 import RoomCard from "@/components/Room/RoomCard";
-import { getRoomByQuery } from "@/libs/apis";
+import { getRoobBySlug, getRoomByQuery } from "@/libs/apis";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import LoadingSpinner from "./loading";
@@ -30,9 +30,14 @@ const Rooms = () => {
             try {
                 let rooms1;
                 if (slug) {
-                    rooms1 = await getRoomByQuery("", typeFilter, slug);
-                    setisSlug(true);
-                    setRoom(rooms1[0]);
+                    rooms1 = await getRoobBySlug(slug);
+                    if (rooms1.length > 0) {
+                        setRoom(rooms1[0]);
+                        setisSlug(true);
+                    } else {
+                        setRoom(null);
+                    }
+
                 } else {
                     rooms1 = await getRoomByQuery("", typeFilter, "");
                 }

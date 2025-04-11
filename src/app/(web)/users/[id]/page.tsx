@@ -2,6 +2,7 @@
 
 'use client';
 
+import UserBookingDetails from '@/components/Users/UserBookingDetails';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -57,9 +58,11 @@ export default function UserPage() {
                         <div className="flex justify-between">
                             <span className="text-lg font-medium text-gray-600">Joined At:</span>
                         </div>
+                        {user.id && <UserBookingDetails userId={user.id} />}
                     </div>
                 </div>
             </div>
+
         </div>
     );
 }

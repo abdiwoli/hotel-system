@@ -6,12 +6,13 @@ import 'react-image-gallery/styles/css/image-gallery.css';
 import { FaBed, FaTv, FaWifi } from 'react-icons/fa';
 import { Booking, Room } from '@/app/models/room';
 import CheckDate from '../CheckDate/CheckDate';
-import { createBooking, getBookingByRoomId } from '@/libs/apis';
+import { getBookingByRoomId } from '@/libs/apis';
 import { useSession } from 'next-auth/react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { getStripe } from '@/libs/stripe';
 import LoadingSpinner from '@/app/(web)/loading';
+import { useRouter } from 'next/navigation';
 
 interface Props {
     room: Room | null;
@@ -33,6 +34,7 @@ const RoomDetails: FC<Props> = ({ room }) => {
     const [numberOfDays, setNumberOfDays] = useState(0);
     const [loading, setLoading] = useState(false);
     const [Books, setBooks] = useState<Booking[]>([]);
+    const router = useRouter();
 
     const handleDateChange = (newCheckIn: string, newCheckOut: string, newAdults: number, newChildren: number) => {
         setCheckIn(newCheckIn);
@@ -93,6 +95,16 @@ const RoomDetails: FC<Props> = ({ room }) => {
             }
         } catch (error: any) {
             setLoading(false);
+
+            if (error?.response?.status === 401) {
+                const shouldLogin = window.confirm('You need to log in to book a room. Do you want to go to the login page?');
+                if (shouldLogin) {
+                    router.push(`/auth?url=rooms&slug=${room?.slug.current}&roomType=${room?.roomType}`);
+
+                }
+                return;
+            }
+
             toast.error(`Booking failed: ${error?.response?.data?.message || error.message}`);
         }
     };

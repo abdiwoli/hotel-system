@@ -81,11 +81,10 @@ const booking = {
     ],
     preview: {
         select: {
-            title: 'hotelroom.name',  // This is where we define what the preview title should be
-            subtitle: 'user.name',     // Assuming the user document has a 'name' field
+            title: 'hotelroom.name',
+            subtitle: 'user.name',
         },
-        prepare(selection: { title: string; subtitle: string }): { title: string; subtitle: string } {
-            const { title, subtitle } = selection;
+        prepare({ title, subtitle }: any) {
             return {
                 title: `${title} - ${subtitle}`,
                 subtitle: `Booking for ${title} by ${subtitle}`,

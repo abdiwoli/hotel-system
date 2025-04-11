@@ -1,6 +1,6 @@
 import axios from "axios";
 import { Booking, CreateBookingDto, Room } from '@/app/models/room';
-import { getBookingsQuery, getFeaturedRoomQuery, getRoomQuery, getRoomTypesQuery } from './SanityQuery';
+import { getBookingsQuery, getBookingsQueryForUser, getFeaturedRoomQuery, getRoomBySlugQuery, getRoomQuery, getRoomTypesQuery } from './SanityQuery';
 import sanityClient from './sanity';
 
 export const getStaticProps = async () => {
@@ -13,10 +13,21 @@ export const getStaticProps = async () => {
 
 };
 
+export const getRoobBySlug = async (slug: string) => {
+    const params = { slug };
+    const rooms: Room[] = await sanityClient.fetch(getRoomBySlugQuery, params);
+    return rooms;
+}
+
+
+export const getRoomTypes = async () => {
+    const rooms: Room[] = await sanityClient.fetch(getRoomTypesQuery);
+    const roomTypes = rooms.map((room) => room.roomType).filter((value, index, self) => self.indexOf(value) === index);
+    return roomTypes;
+}
 
 
 export const getRoomByQuery = async (name: string, roomType: string, slug: string) => {
-    console.log("Fetching rooms with params:", { name, roomType, slug });
     const params = { name, roomType, slug };
     const rooms: Room[] = await sanityClient.fetch(getRoomQuery, params);
     return rooms;
@@ -36,12 +47,19 @@ export const getBookingByRoomId = async (roomId: string) => {
     return [];
 };
 
+export const getBookingByUserId = async (userId: string) => {
+    const params = { userId };
+    const bookings: Booking[] = await sanityClient.fetch(getBookingsQueryForUser, params);
+    if (bookings && bookings.length > 0) {
+        return bookings;
+    }
+    console.log("no booking found");
+    return [];
 
-export const getRoomTypes = async () => {
-    const rooms: Room[] = await sanityClient.fetch(getRoomTypesQuery);
-    const roomTypes = rooms.map((room) => room.roomType).filter((value, index, self) => self.indexOf(value) === index);
-    return roomTypes;
 }
+
+
+
 
 // libs/apis.ts
 
