@@ -14,7 +14,6 @@ export async function POST(request: Request): Promise<Response> {
     const sig = request.headers.get('stripe-signature');
 
     if (!sig || !webhookSecret) {
-        console.log('sig or webhook maybe undefined', sig, webhookSecret);
         return new Response('Missing signature or webhook secret', { status: 400 });
     }
 
