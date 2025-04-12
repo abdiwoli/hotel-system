@@ -1,27 +1,30 @@
 // File: /app/api/webhook/chapa/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { createBooking, getPendingBookingData } from '@/libs/apis';
+import { createBooking, deletePendingBooking, getPendingBookingData } from '@/libs/apis';
 
 export async function POST(req: NextRequest) {
     try {
-        const body = await req.json();
+        const chapaSecret = process.env.CHAPA_WEBHOOK_SECRET!;
+        const signature = req.headers.get('x-chapa-signature');
 
+        if (!signature || signature !== chapaSecret) {
+            console.warn('⚠️ Invalid or missing Chapa signature');
+            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+        }
+
+        const body = await req.json();
         console.log('📬 Chapa Webhook Received:', body);
 
-        const event = body; // Chapa sends event in plain JSON
-        const { status, tx_ref, data } = event;
+        const { status, data } = body;
 
         if (status === 'success' && data.status === 'success') {
             const txRef = data.tx_ref;
 
-            // 🔍 1. Lookup your temporary data from DB using txRef
             const bookingData = await getPendingBookingData(txRef);
-
             if (!bookingData) {
                 return NextResponse.json({ message: 'Pending booking not found' }, { status: 404 });
             }
 
-            // Manually pick required fields
             const bookingPayload = {
                 adults: bookingData.adults,
                 checkIn: bookingData.checkIn,
@@ -34,11 +37,16 @@ export async function POST(req: NextRequest) {
                 user: bookingData.user._ref,
             };
 
-            // ✅ Create confirmed booking
-            await createBooking(bookingPayload);
+            const create = await createBooking(bookingPayload);
+            if (!create) {
+                return NextResponse.json({ message: 'Failed to create booking' }, { status: 500 });
+            }
 
-
-            // 🧹 3. Optionally clean up the pending record
+            const deleted = await deletePendingBooking(bookingData._id);
+            if (!deleted) {
+                console.error('Failed to delete pending booking:', deleted);
+                return NextResponse.json({ message: 'Failed to delete pending booking' }, { status: 500 });
+            }
 
             return NextResponse.json({ message: 'Booking confirmed' }, { status: 200 });
         }
