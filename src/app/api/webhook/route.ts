@@ -9,10 +9,12 @@ const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 const checkout_session_completed = 'checkout.session.completed';
 
 export async function POST(request: Request): Promise<Response> {
+    console.log('Received webhook request');
     const body = await request.text();
     const sig = request.headers.get('stripe-signature');
 
     if (!sig || !webhookSecret) {
+        console.log('sig or webhook maybe undefined', sig, webhookSecret);
         return new Response('Missing signature or webhook secret', { status: 400 });
     }
 
