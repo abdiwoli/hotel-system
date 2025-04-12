@@ -4,11 +4,13 @@ import { createBooking, deletePendingBooking, getPendingBookingData } from '@/li
 
 export async function POST(req: NextRequest) {
     try {
-        const chapaSecret = process.env.CHAPA_WEBHOOK_SECRET!;
+        const chapaSecret = process.env.STRIPE_WEBHOOK_SECRET!;
         const signature = req.headers.get('x-chapa-signature');
 
         if (!signature || signature !== chapaSecret) {
             console.warn('⚠️ Invalid or missing Chapa signature');
+            console.log('Received signature:', signature);
+            console.log('Expected signature:', chapaSecret);
             return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
         }
 
