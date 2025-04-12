@@ -76,7 +76,7 @@ export async function POST(req: Request) {
         first_name: session.user.name?.split(' ')[0] || 'Guest',
         last_name: session.user.name?.split(' ')[1] || 'User',
         tx_ref: txRef,
-        callback_url: `${origin}/api/verify/chapa?`,
+        callback_url: `${origin}/api/verify/chapa?tx_ref=${txRef}`,
         return_url: `${origin}/users/${userId}`,
         customization: {
           title: safeTitle,

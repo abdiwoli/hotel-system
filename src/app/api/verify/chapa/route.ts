@@ -4,12 +4,11 @@ import { NextRequest, NextResponse } from "next/server";
 // /api/verify/chapa
 export async function GET(req: NextRequest) {
     const url = new URL(req.url);
-    const tx_ref = url.searchParams.get("trx_ref");
-    const status = url.searchParams.get("status");
+    const tx_ref = url.searchParams.get("tx_ref");
 
     console.log("🌐 Chapa verification endpoint hit");
     console.log("🔗 Full URL:", url.toString());
-    console.log("📦 Received params:", { tx_ref, status });
+    console.log("📦 Received params:", { tx_ref });
 
     // Basic validation
     if (!tx_ref) {
@@ -17,16 +16,6 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ message: "Missing tx_ref" }, { status: 400 });
     }
 
-    if (!status) {
-        console.log("❌ Missing status");
-        return NextResponse.json({ message: "Missing status" }, { status: 400 });
-    }
-
-    // Make sure status is actually marked successful
-    if (status.toLowerCase() !== "success" && status.toLowerCase() !== "successful") {
-        console.log("❌ Status is not 'success' or 'successful'");
-        return NextResponse.json({ message: "Payment not successful" }, { status: 400 });
-    }
 
     // Hit Chapa verify endpoint
     const verifyUrl = `https://api.chapa.co/v1/transaction/verify/${tx_ref}`;
