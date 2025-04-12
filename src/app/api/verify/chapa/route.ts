@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 // /api/verify/chapa
 export async function GET(req: NextRequest) {
     const url = new URL(req.url);
-    const tx_ref = url.searchParams.get("tx_ref");
+    const tx_ref = url.searchParams.get("trx_ref");
     const status = url.searchParams.get("status");
 
     console.log("🌐 Chapa verification endpoint hit");
@@ -48,6 +48,7 @@ export async function GET(req: NextRequest) {
             // Here you would typically create a booking in your database
 
             const bookingData = await getPendingBookingData(tx_ref);
+            console.log("📦 Booking data:", bookingData);
             if (!bookingData) {
                 return NextResponse.json({ message: 'Pending booking not found' }, { status: 404 });
             }
