@@ -47,7 +47,19 @@ export type CreateBookingDto = {
     adults: number;
     children: number;
     totalPrice: number;
+}
 
+export type CreatePendingBookingDto = {
+    user: string;
+    hotelroom: string;
+    checkIn: string;
+    checkOut: string;
+    numberOfDays: number;
+    discount: number,
+    adults: number;
+    children: number;
+    totalPrice: number;
+    txRef: string;
 }
 
 export type Booking = {

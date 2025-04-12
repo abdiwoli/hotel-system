@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Booking, CreateBookingDto, Room } from '@/app/models/room';
+import { Booking, CreateBookingDto, CreatePendingBookingDto, Room } from '@/app/models/room';
 import { getBookingsQuery, getBookingsQueryForUser, getFeaturedRoomQuery, getRoomBySlugQuery, getRoomQuery, getRoomTypesQuery } from './SanityQuery';
 import sanityClient from './sanity';
 
@@ -12,6 +12,35 @@ export const getStaticProps = async () => {
     }
 
 };
+
+
+
+export const getPendingBookingData = async (txRef: string) => {
+    const query = `*[_type == "Bending-booking" && txRef == $txRef]{
+    _id,
+    user,
+    hotelroom,
+    checkIn,
+    checkOut,
+    numberOfDays,
+    discount,
+    adults,
+    children,
+    totalPrice,
+    txRef
+  }`;
+
+    const params = { txRef };
+    const bookings: Booking[] = await sanityClient.fetch(query, params);
+
+    if (bookings && bookings.length > 0) {
+        return bookings[0];
+    }
+
+    console.log('No pending booking found for txRef:', txRef);
+    return null;
+};
+
 
 export const getRoobBySlug = async (slug: string) => {
     const params = { slug };
@@ -59,8 +88,6 @@ export const getBookingByUserId = async (userId: string) => {
 }
 
 
-
-
 // libs/apis.ts
 
 export const createBooking = async ({
@@ -74,6 +101,17 @@ export const createBooking = async ({
     discount,
     user,
 }: CreateBookingDto) => {
+    console.log('Creating booking', {
+        adults,
+        checkIn,
+        checkOut,
+        children,
+        hotelroom,
+        numberOfDays,
+        totalPrice,
+        discount,
+        user,
+    });
     const mutation = {
         mutations: [
             {
@@ -103,6 +141,79 @@ export const createBooking = async ({
 };
 
 
+export const createPendingBooking = async ({
+    adults,
+    checkIn,
+    checkOut,
+    children,
+    hotelroom,
+    numberOfDays,
+    totalPrice,
+    discount,
+    user,
+    txRef,
+}: CreatePendingBookingDto) => {
+    console.log('Creating pending booking')
+    const mutation = {
+        mutations: [
+            {
+                create: {
+                    _type: 'bending-booking',
+                    user: { _type: 'reference', _ref: user },
+                    hotelroom: { _type: 'reference', _ref: hotelroom },
+                    checkIn,
+                    checkOut,
+                    numberOfDays,
+                    adults,
+                    discount,
+                    children,
+                    totalPrice,
+                    txRef,
+                },
+            },
+        ],
+    };
+
+    const { data } = await axios.post(
+        `https://${process.env.NEXT_PUBLIC_SANITY_PROJECT_ID}.api.sanity.io/v2021-10-21/data/mutate/${process.env.NEXT_PUBLIC_SANITY_DATASET}`,
+        mutation,
+        { headers: { Authorization: `Bearer ${process.env.SANITY_API_TOKEN}` } }
+    );
+
+    return { success: true, data, error: false };
+};
+
+
+
+export const deletePendingBooking = async (bookingId: string) => {
+    if (!bookingId) throw new Error("bookingId is required");
+
+    const mutation = {
+        mutations: [
+            {
+                delete: {
+                    id: bookingId,
+                },
+            },
+        ],
+    };
+
+    const { data } = await axios.post(
+        `https://${process.env.NEXT_PUBLIC_SANITY_PROJECT_ID}.api.sanity.io/v2021-10-21/data/mutate/${process.env.NEXT_PUBLIC_SANITY_DATASET}`,
+        mutation,
+        {
+            headers: {
+                Authorization: `Bearer ${process.env.SANITY_API_TOKEN}`,
+            },
+        }
+    );
+
+    return { success: true, data };
+};
+
+
+
+
 export async function getRoom(slug: string) {
     const result = await sanityClient.fetch<Room>(
         getRoomQuery,
@@ -114,6 +225,7 @@ export async function getRoom(slug: string) {
 }
 
 export const updateHotelRoom = async (hotelRoomId: string) => {
+    console.log("updating hotel room", hotelRoomId);
     const mutation = {
         mutations: [
             {

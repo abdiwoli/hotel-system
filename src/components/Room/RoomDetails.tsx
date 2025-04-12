@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useState, useRef } from 'react';
 import ImageGallery from 'react-image-gallery';
 import 'react-image-gallery/styles/css/image-gallery.css';
 import { FaBed, FaTv, FaWifi } from 'react-icons/fa';
@@ -13,6 +13,8 @@ import axios from 'axios';
 import { getStripe } from '@/libs/stripe';
 import LoadingSpinner from '@/app/(web)/loading';
 import { useRouter } from 'next/navigation';
+import PaymentMethodSelector from './PaymentMethodSelector';
+
 
 interface Props {
     room: Room | null;
@@ -35,6 +37,15 @@ const RoomDetails: FC<Props> = ({ room }) => {
     const [loading, setLoading] = useState(false);
     const [Books, setBooks] = useState<Booking[]>([]);
     const router = useRouter();
+    const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'chapa'>('stripe');
+    const paymentMethodRef = useRef<'stripe' | 'chapa'>('stripe');
+
+
+
+    const updatePaymentMethod = (method: 'stripe' | 'chapa') => {
+        paymentMethodRef.current = method;
+        setPaymentMethod(method);
+    };
 
     const handleDateChange = (newCheckIn: string, newCheckOut: string, newAdults: number, newChildren: number) => {
         setCheckIn(newCheckIn);
@@ -74,40 +85,42 @@ const RoomDetails: FC<Props> = ({ room }) => {
     const handleBooking = async () => {
         try {
             setLoading(true);
-            const stripe = await getStripe();
-            const { data: stripeSession } = await axios.post('/api/stripe', {
+            const method = paymentMethodRef.current; // 🔥 always fresh
+            console.log('Final method selected:', method); // Optional debug
+
+            const payload = {
                 adults,
                 checkinDate: checkIn,
                 checkoutDate: checkOut,
                 children,
                 numberOfDays,
                 hotelRoomSlug: room?.slug.current,
-            });
+            };
 
-            if (stripe) {
-                const result = await stripe.redirectToCheckout({ sessionId: stripeSession.id });
-                if (result.error) toast.error('Failed to redirect to payment.');
-
-                if (room && session?.user.id) {
-                    setLoading(false);
-                    toast.success('Booking successful!');
-                }
+            if (method === 'stripe') {
+                const stripe = await getStripe();
+                const { data: stripeSession } = await axios.post('/api/stripe', payload);
+                await stripe?.redirectToCheckout({ sessionId: stripeSession.id });
+            } else if (method === 'chapa') {
+                const { data } = await axios.post('/api/chapa', payload);
+                console.log('Chapa response:', data);
+                router.push(data?.checkout_url);
             }
+
         } catch (error: any) {
             setLoading(false);
-
             if (error?.response?.status === 401) {
                 const shouldLogin = window.confirm('You need to log in to book a room. Do you want to go to the login page?');
                 if (shouldLogin) {
                     router.push(`/auth?url=rooms&slug=${room?.slug.current}&roomType=${room?.roomType}`);
-
                 }
                 return;
             }
-
             toast.error(`Booking failed: ${error?.response?.data?.message || error.message}`);
         }
     };
+
+
 
     if (!room) return <>No room selected.</>;
 
@@ -180,6 +193,7 @@ const RoomDetails: FC<Props> = ({ room }) => {
                     </div>
 
                     <CheckDate onDateChange={handleDateChange} bookings={Books} />
+                    <PaymentMethodSelector selected={paymentMethod} onSelect={updatePaymentMethod} />
 
                     {totalPrice > 0 && (
                         <div className="flex justify-between items-center bg-white p-4 rounded-lg shadow">
