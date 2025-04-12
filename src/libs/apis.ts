@@ -16,7 +16,7 @@ export const getStaticProps = async () => {
 
 
 export const getPendingBookingData = async (txRef: string) => {
-    const query = `*[_type == "Bending-booking" && txRef == $txRef]{
+    const query = `*[_type == "bending-booking" && txRef == $txRef]{
     _id,
     user,
     hotelroom,
@@ -34,6 +34,7 @@ export const getPendingBookingData = async (txRef: string) => {
     const bookings: Booking[] = await sanityClient.fetch(query, params);
 
     if (bookings && bookings.length > 0) {
+        console.log('Pending booking found:', bookings[0]);
         return bookings[0];
     }
 

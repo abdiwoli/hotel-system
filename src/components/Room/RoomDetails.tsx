@@ -6,7 +6,7 @@ import 'react-image-gallery/styles/css/image-gallery.css';
 import { FaBed, FaTv, FaWifi } from 'react-icons/fa';
 import { Booking, Room } from '@/app/models/room';
 import CheckDate from '../CheckDate/CheckDate';
-import { getBookingByRoomId } from '@/libs/apis';
+import { getBookingByRoomId, getPendingBookingData } from '@/libs/apis';
 import { useSession } from 'next-auth/react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';

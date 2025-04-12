@@ -1,3 +1,4 @@
+import { createBooking, deletePendingBooking, getPendingBookingData } from "@/libs/apis";
 import { NextRequest, NextResponse } from "next/server";
 
 // /api/verify/chapa
@@ -44,6 +45,41 @@ export async function GET(req: NextRequest) {
 
         if (data.status === "success" && data.data?.status === "success") {
             console.log("🎉 Payment verified successfully");
+            // Here you would typically create a booking in your database
+
+            const bookingData = await getPendingBookingData(tx_ref);
+            if (!bookingData) {
+                return NextResponse.json({ message: 'Pending booking not found' }, { status: 404 });
+            }
+
+            const bookingPayload = {
+                adults: bookingData.adults,
+                checkIn: bookingData.checkIn,
+                checkOut: bookingData.checkOut,
+                children: bookingData.children,
+                hotelroom: bookingData.hotelroom._ref,
+                numberOfDays: bookingData.numberOfDays,
+                totalPrice: bookingData.totalPrice,
+                discount: bookingData.discount,
+                user: bookingData.user._ref,
+            };
+
+            const create = await createBooking(bookingPayload);
+            if (!create) {
+                return NextResponse.json({ message: 'Failed to create booking' }, { status: 500 });
+            }
+
+            const deleted = await deletePendingBooking(bookingData._id);
+            if (!deleted) {
+                console.error('Failed to delete pending booking:', deleted);
+                return NextResponse.json({ message: 'Failed to delete pending booking' }, { status: 500 });
+            }
+
+
+
+
+
+            // return NextResponse.json({ message: "Payment verified successfully" });
             return NextResponse.json({ message: "Booking created successfully" });
         } else {
             console.error("❌ Chapa verification failed:", data);
