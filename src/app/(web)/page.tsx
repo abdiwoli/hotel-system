@@ -6,9 +6,12 @@ import PageSearch from "@/components/PageSearch/PageSearch";
 import { getStaticProps } from "@/libs/apis";
 
 
+
 const Home = async () => {
   const result = await getStaticProps();
   const rooms = result.rooms
+
+
 
   return (
     <>
