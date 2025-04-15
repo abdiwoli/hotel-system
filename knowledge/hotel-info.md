@@ -20,6 +20,11 @@
 2. **Executive Suite** - $499/night - Separate living area
 3. **Presidential Suite** - $899/night - Private balcony, jacuzzi
 
+## avaibility
+- all rooms are availble
+- how to book: on the top navigate rooms and select the room you want
+- how to pay: you can pay with card or mobile money or cash
+
 ## Policies
 - Cancellation: Free up to 48 hours before arrival
 - Pets: Small dogs allowed ($50 fee)
