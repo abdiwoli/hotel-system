@@ -85,3 +85,30 @@ export const getRoomTypesQuery = groq`
 `;
 
 
+
+
+export const getReviewsQuery = groq`
+  *[_type == "review" && hotelRoom._ref == $ref] {
+    _id,
+    _createdAt,
+    _updatedAt,
+    rating,
+    comment,
+    hotelRoom-> {
+      _id,
+      name
+    },
+    user-> {
+      _id,
+      name,
+      image {
+        asset-> {
+          url
+        }
+      }
+    },
+
+
+  }`;
+
+

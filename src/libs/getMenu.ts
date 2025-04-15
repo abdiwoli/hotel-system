@@ -1,0 +1,40 @@
+export default function getMenu() {
+    return [
+        {
+            id: '1',
+            name: 'Nasi Goreng',
+            description: 'Fried rice with chicken and vegetables.',
+            price: 5,
+            category: 'Main Course',
+            image: 'https://images.unsplash.com/photo-1680674774705-90b4904b3a7f?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+            ingredients: ['rice', 'chicken', 'vegetables', 'soy sauce'],
+            isVegetarian: false,
+            isVegan: false,
+            isGlutenFree: false,
+        },
+        {
+            id: '2',
+            name: 'Sate Ayam',
+            description: 'Grilled chicken skewers with peanut sauce.',
+            price: 7,
+            category: 'Main Course',
+            image: 'https://images.unsplash.com/photo-1644288232801-2b40ff99d54f?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8U2F0ZSUyMEF5YW18ZW58MHx8MHx8fDA%3D',
+            ingredients: ['chicken', 'peanut sauce', 'spices'],
+            isVegetarian: false,
+            isVegan: false,
+            isGlutenFree: true,
+        },
+        {
+            id: '3',
+            name: 'Gado-Gado',
+            description: 'Mixed vegetables with peanut sauce.',
+            price: 15,
+            category: 'Salad',
+            image: 'https://images.unsplash.com/photo-1707269561481-a4a0370a980a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8R2FkbyUyMEdhZG98ZW58MHx8MHx8fDA%3D',
+            ingredients: ['vegetables', 'peanut sauce', 'tofu'],
+            isVegetarian: true,
+            isVegan: true,
+            isGlutenFree: true,
+        },
+    ];
+}

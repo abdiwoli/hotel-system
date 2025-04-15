@@ -14,6 +14,7 @@ import { getStripe } from '@/libs/stripe';
 import LoadingSpinner from '@/app/(web)/loading';
 import { useRouter } from 'next/navigation';
 import PaymentMethodSelector from './PaymentMethodSelector';
+import RoomReviews from '../Review/RoomReviews';
 
 
 interface Props {
@@ -207,7 +208,11 @@ const RoomDetails: FC<Props> = ({ room }) => {
                         </div>
                     )}
                 </div>
+
             </div>
+            <RoomReviews hotelRoomId={room._id} slug={room.slug.current} />
+
+            {/* Booking Status */}
 
             {loading && (
                 <div className="fixed inset-0 z-50 bg-white/60 backdrop-blur-sm flex items-center justify-center">

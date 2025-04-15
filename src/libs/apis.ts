@@ -1,7 +1,8 @@
 import axios from "axios";
 import { Booking, CreateBookingDto, CreatePendingBookingDto, Room } from '@/app/models/room';
-import { getBookingsQuery, getBookingsQueryForUser, getFeaturedRoomQuery, getRoomBySlugQuery, getRoomQuery, getRoomTypesQuery } from './SanityQuery';
+import { getBookingsQuery, getBookingsQueryForUser, getFeaturedRoomQuery, getReviewsQuery, getRoomBySlugQuery, getRoomQuery, getRoomTypesQuery } from './SanityQuery';
 import sanityClient from './sanity';
+import { Review } from "@/app/models/review";
 
 export const getStaticProps = async () => {
     const featuredRooms: Room[] = await sanityClient.fetch(getFeaturedRoomQuery);
@@ -248,3 +249,65 @@ export const updateHotelRoom = async (hotelRoomId: string) => {
 
     return data;
 };
+
+
+export const getReviews = async (ref: string) => {
+    if (!ref) throw new Error("slug is required");
+    console.log("fetching reviews for ref", ref);
+    const params = { ref };
+    const reviews = await sanityClient.fetch(getReviewsQuery, params);
+    if (!reviews || reviews.length === 0) {
+        console.log("no reviews found for ref", ref);
+        return null;
+    }
+    console.log("reviews found for ref", ref, reviews);
+
+    return reviews;
+}
+
+
+
+
+
+export const createReview = async (
+    ref: string,
+    rating: number,
+    comment: string,
+    userId: string
+) => {
+    if (!ref || !rating || !userId) {
+        throw new Error("hotelRoom ref, rating, and userId are required");
+    }
+
+    const mutation = {
+        mutations: [
+            {
+                create: {
+                    _type: 'review',
+                    rating,
+                    comment,
+                    hotelRoom: { _type: 'reference', _ref: ref },
+                    user: { _type: 'reference', _ref: userId }, // ✅ Add user reference
+                },
+            },
+        ],
+    };
+
+    try {
+        const { data } = await axios.post(
+            `https://${process.env.NEXT_PUBLIC_SANITY_PROJECT_ID}.api.sanity.io/v2021-10-21/data/mutate/${process.env.NEXT_PUBLIC_SANITY_DATASET}`,
+            mutation,
+            {
+                headers: {
+                    Authorization: `Bearer ${process.env.SANITY_API_TOKEN}`,
+                },
+            }
+        );
+
+        return data;
+    } catch (err: any) {
+        console.error("❌ createReview failed:", err.response?.data || err.message);
+        throw err;
+    }
+};
+
