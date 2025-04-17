@@ -72,7 +72,6 @@ const ChatBot = () => {
         }
     };
 
-
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -81,18 +80,38 @@ const ChatBot = () => {
     };
 
     useEffect(() => {
-        // Scroll to bottom when messages change
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
+    // Close chat when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const chatContainer = document.querySelector('.chat-container');
+            const chatButton = document.querySelector('.chat-button');
+
+            if (isOpen &&
+                chatContainer &&
+                !chatContainer.contains(event.target as Node) &&
+                chatButton &&
+                !chatButton.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isOpen]);
+
     return (
         <div className="fixed bottom-4 right-4 z-50">
-            {/* Chat Window */}
+            {/* Chat Window - Now responsive */}
             {isOpen && (
-                <div className="relative">
-                    <div className="absolute bottom-full right-0 mb-2 w-80  rounded-t-lg shadow-xl overflow-hidden border border-gray-200">
+                <div className="chat-container relative">
+                    <div className="absolute bottom-full right-0 mb-2 w-[90vw] max-w-md sm:w-80 rounded-t-lg shadow-xl overflow-hidden border border-gray-200 bg-white">
                         {/* Header */}
-                        <div className=" p-4 flex justify-between items-center">
+                        <div className="bg-blue-600 text-white p-3 flex justify-between items-center">
                             <div className="flex items-center space-x-2">
                                 <BsRobot className="text-xl" />
                                 <h3 className="font-bold text-lg">AI Assistant</h3>
@@ -100,24 +119,25 @@ const ChatBot = () => {
                             <button
                                 onClick={() => setIsOpen(false)}
                                 className="p-1 rounded-full hover:bg-blue-700 transition-colors"
+                                aria-label="Close chat"
                             >
                                 <FiX className="text-lg" />
                             </button>
                         </div>
 
                         {/* Messages */}
-                        <div className="h-80 p-4 overflow-y-auto bg-gray-50">
+                        <div className="h-[50vh] sm:h-80 p-4 overflow-y-auto bg-gray-50">
                             {messages.map((message) => (
                                 <div
                                     key={message.id}
                                     className={`mb-4 flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                                 >
                                     <div
-                                        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${message.sender === 'user'
+                                        className={`max-w-[80%] px-4 py-2 rounded-lg ${message.sender === 'user'
                                             ? 'bg-blue-500 text-white rounded-br-none'
                                             : 'bg-gray-200 text-gray-800 rounded-bl-none'}`}
                                     >
-                                        <p className="text-sm">{message.text}</p>
+                                        <p className="text-sm break-words">{message.text}</p>
                                         <p className={`text-xs mt-1 ${message.sender === 'user' ? 'text-blue-100' : 'text-gray-500'}`}>
                                             {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                         </p>
@@ -126,7 +146,7 @@ const ChatBot = () => {
                             ))}
                             {isTyping && (
                                 <div className="flex justify-start mb-4">
-                                    <div className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg rounded-bl-none">
+                                    <div className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg rounded-bl-none max-w-[80%]">
                                         <div className="flex space-x-1">
                                             <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                                             <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -141,18 +161,20 @@ const ChatBot = () => {
                         {/* Input Area */}
                         <div className="border-t border-gray-200 p-3 bg-white">
                             <div className="flex items-center">
-                                <input
-                                    type="text"
+                                <textarea
                                     value={inputValue}
                                     onChange={(e) => setInputValue(e.target.value)}
                                     onKeyDown={handleKeyDown}
                                     placeholder="Type your message..."
-                                    className="flex-1 border border-gray-300 rounded-l-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    rows={1}
+                                    className="flex-1 border border-gray-300 rounded-l-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                                    style={{ minHeight: '44px', maxHeight: '120px' }}
                                 />
                                 <button
                                     onClick={handleSendMessage}
                                     disabled={inputValue.trim() === ''}
-                                    className={`bg-blue-600 text-white px-4 py-2 rounded-r-lg ${inputValue.trim() === '' ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'} transition-colors`}
+                                    className={`bg-blue-600 text-white px-4 py-2 rounded-r-lg h-[44px] ${inputValue.trim() === '' ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'} transition-colors`}
+                                    aria-label="Send message"
                                 >
                                     <FiSend className="text-lg" />
                                 </button>
@@ -168,8 +190,8 @@ const ChatBot = () => {
             {/* Chat Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className={`flex items-center justify-center w-14 h-14 rounded-full shadow-lg transition-all duration-300 ${isOpen ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-600 hover:bg-blue-700'} text-white`}
-                aria-label="Chat with us"
+                className={`chat-button flex items-center justify-center w-14 h-14 rounded-full shadow-lg transition-all duration-300 ${isOpen ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-600 hover:bg-blue-700'} text-white`}
+                aria-label={isOpen ? "Close chat" : "Open chat"}
             >
                 {isOpen ? (
                     <FiX className="text-2xl" />
